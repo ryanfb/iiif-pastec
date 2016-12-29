@@ -20,11 +20,11 @@ post '/upload' do
   response = `curl -s -X POST --data-binary @#{params['imfile'][:tempfile].path} #{config[:pastec_server]}/index/searcher`.chomp
   $stderr.puts response
   parsed_response = JSON.parse(response)
-  images = []
+  @images = []
   store.transaction do
     parsed_response['image_ids'].each do |image_id|
-      images << store[:identifier_mapping][image_id]
+      @images << store[:identifier_mapping][image_id]
     end
   end
-  images.join("\n")
+  haml :post_upload
 end
