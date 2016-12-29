@@ -1,3 +1,11 @@
+%span Query image:
+%br
+%img{:src => "data:image/jpg;base64,#{@query_image}", :width => 400}
+%br
+%br
+%span Results:
+%br
+
 - @images.each do |image|
   %span= image[:metadata][:attribution]
   %br
