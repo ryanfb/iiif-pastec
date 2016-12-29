@@ -34,7 +34,7 @@ iiif_manifest['sequences'].each do |sequence|
       quality = image['resource']['service']['@context'] =~ /iiif.io\/api\/image\/2/ ? 'default' : 'native'
       identifier = image['resource']['service']['@id'].chomp('/')
       url = URI.escape("#{identifier}/full/!#{MAXIMUM_RESOLUTION},#{MAXIMUM_RESOLUTION}/0/#{quality}.#{DEFAULT_EXTENSION}")
-      output_filename = [metadata_prefix, current_sequence, current_canvas, current_image].join('_') + '.' + DEFAULT_EXTENSION
+      output_filename = File.join('images',[metadata_prefix, current_sequence, current_canvas, canvas['label'], current_image].join('_') + '.' + DEFAULT_EXTENSION)
       $stderr.puts output_filename
       unless File.exist?(output_filename)
         # `curl #{url} | curl -X PUT --data-binary @- #{PASTEC_SERVER}/index/images/#{pastec_identifier}`
