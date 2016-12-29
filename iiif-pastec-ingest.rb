@@ -2,6 +2,7 @@
 
 require 'json'
 require 'uri'
+require 'digest'
 
 PASTEC_SERVER='http://localhost:4212'
 MAXIMUM_RESOLUTION=1000
@@ -10,7 +11,7 @@ DEFAULT_DELAY=1
 
 iiif_manifest = JSON.parse(ARGF.read)
 
-manifest_id = ''
+manifest_id = Digest::SHA256.hexdigest(iiif_manifest.to_s).to_s
 begin
    manifest_id = " #{iiif_manifest['metadata'].select{|m| m['label'] == 'Id'}.first['value']}"
 rescue
@@ -38,7 +39,9 @@ iiif_manifest['sequences'].each do |sequence|
         $stderr.puts `curl -o #{output_filename} #{url}`
         sleep(DEFAULT_DELAY)
       end
-      `curl -X PUT --data-binary @#{output_filename} #{PASTEC_SERVER}/index/images/#{pastec_identifier}`
+      unless system("curl -X PUT --data-binary @#{output_filename} #{PASTEC_SERVER}/index/images/#{pastec_identifier}")
+        puts $?.inspect
+      end
       current_image += 1
       pastec_identifier += 1
     end
