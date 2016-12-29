@@ -31,6 +31,7 @@ store.transaction do
   pastec_identifier = store[:last_pastec_identifier] || 1
   store[:indexed_files] ||= []
   store[:identifier_mapping] ||= {}
+  store[:metadata_mapping] ||= {}
 end
 
 metadata_prefix = "#{iiif_manifest['label']}#{manifest_id}".gsub(/[^-.a-zA-Z0-9_]/,'_')
@@ -63,6 +64,13 @@ iiif_manifest['sequences'].each do |sequence|
           store[:identifier_mapping][pastec_identifier] = identifier
           pastec_identifier += 1
         end
+
+        store[:metadata_mapping][identifier] ||= {}
+        store[:metadata_mapping][identifier][:label] = iiif_manifest['label']
+        store[:metadata_mapping][identifier][:seeAlso] = iiif_manifest['seeAlso']
+        store[:metadata_mapping][identifier][:attribution] = iiif_manifest['attribution']
+        store[:metadata_mapping][identifier][:manifest] = iiif_manifest['@id']
+        store[:metadata_mapping][identifier][:canvas] = canvas['label']
       end
       current_image += 1
     end

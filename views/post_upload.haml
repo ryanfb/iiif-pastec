@@ -1,3 +1,9 @@
 - @images.each do |image|
-  %img{:src => image + '/full/!400,400/0/default.jpg'}
+  %span= image[:metadata][:attribution]
+  %br
+  %img{:src => image[:iiif_identifier] + '/full/!400,400/0/default.jpg'}
+  %br
+  %a{:target => '_blank', :href => image[:metadata][:seeAlso]}= [image[:metadata][:label],image[:metadata][:canvas]].join(', ')
+  %a{:target => '_blank', :href => image[:metadata][:manifest]} (manifest)
+  %br
   %br

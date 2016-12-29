@@ -23,7 +23,7 @@ post '/upload' do
   @images = []
   store.transaction do
     parsed_response['image_ids'].each do |image_id|
-      @images << store[:identifier_mapping][image_id]
+      @images << {:iiif_identifier => store[:identifier_mapping][image_id], :metadata => store[:metadata_mapping][store[:identifier_mapping][image_id]]}
     end
   end
   haml :post_upload
