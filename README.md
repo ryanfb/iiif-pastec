@@ -5,6 +5,7 @@ Scripts for using [Pastec](http://pastec.io/) as an image-based search engine fo
 ## Requirements
 
  * Ruby 2+
+ * [bundler](http://bundler.io/)
  * curl
  * A running Pastec server
 
