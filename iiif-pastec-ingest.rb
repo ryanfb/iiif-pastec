@@ -3,12 +3,15 @@
 require 'json'
 require 'uri'
 require 'digest'
+require 'yaml/store'
 
 PASTEC_INDEX_PATH='/pastec/index.dat'
 PASTEC_SERVER='http://localhost:4212'
 MAXIMUM_RESOLUTION=1000
 DEFAULT_EXTENSION='jpg'
 DEFAULT_DELAY=1
+
+store = YAML::Store.new('iiif-pastec.yml')
 
 iiif_manifest = JSON.parse(ARGF.read)
 
@@ -20,8 +23,14 @@ end
 
 `curl -X POST -d '{"type":"LOAD", "index_path":"#{PASTEC_INDEX_PATH}"' #{PASTEC_SERVER}/index/io`
 
+pastec_identifier = nil
+store.transaction do
+  pastec_identifier = store[:last_pastec_identifier] || 1
+  store[:indexed_files] ||= []
+  store[:identifier_mapping] ||= {}
+end
+
 metadata_prefix = "#{iiif_manifest['label']}#{manifest_id}".gsub(/[^-.a-zA-Z0-9_]/,'_')
-pastec_identifier = 1
 current_sequence = 0
 iiif_manifest['sequences'].each do |sequence|
   $stderr.puts "Downloading #{sequence['canvases'].length} canvases"
@@ -42,15 +51,25 @@ iiif_manifest['sequences'].each do |sequence|
         $stderr.puts `curl -o #{output_filename} #{url}`
         sleep(DEFAULT_DELAY)
       end
-      unless system("curl -X PUT --data-binary @#{output_filename} #{PASTEC_SERVER}/index/images/#{pastec_identifier}")
-        puts $?.inspect
+      store.transaction do
+        unless store[:indexed_files].include?(output_filename)
+          unless system("curl -X PUT --data-binary @#{output_filename} #{PASTEC_SERVER}/index/images/#{pastec_identifier}")
+            puts $?.inspect
+          end
+          store[:indexed_files] << output_filename
+          store[:identifier_mapping][pastec_identifier] = identifier
+          pastec_identifier += 1
+        end
       end
       current_image += 1
-      pastec_identifier += 1
     end
     current_canvas += 1
   end
   current_sequence += 1
+end
+
+store.transaction do
+  store[:last_pastec_identifier] = pastec_identifier
 end
 
 `curl -X POST -d '{"type":"WRITE", "index_path":"#{PASTEC_INDEX_PATH}"' #{PASTEC_SERVER}/index/io`
