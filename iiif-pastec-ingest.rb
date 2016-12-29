@@ -3,15 +3,18 @@
 require 'json'
 require 'uri'
 require 'digest'
+require 'yaml'
 require 'yaml/store'
 
-PASTEC_INDEX_PATH='/pastec/index.dat'
-PASTEC_SERVER='http://localhost:4212'
-MAXIMUM_RESOLUTION=1000
-DEFAULT_EXTENSION='jpg'
-DEFAULT_DELAY=1
+config = YAML.load_file('config.yml')
 
-store = YAML::Store.new('iiif-pastec.yml')
+PASTEC_INDEX_PATH = config[:pastec_index_path]
+PASTEC_SERVER = config[:pastec_server]
+MAXIMUM_RESOLUTION = 1000
+DEFAULT_EXTENSION = 'jpg'
+DEFAULT_DELAY = 1
+
+store = YAML::Store.new(config[:persistent_store])
 
 iiif_manifest = JSON.parse(ARGF.read)
 
