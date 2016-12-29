@@ -4,6 +4,7 @@ require 'json'
 require 'uri'
 require 'digest'
 
+PASTEC_INDEX_PATH='/pastec/index.dat'
 PASTEC_SERVER='http://localhost:4212'
 MAXIMUM_RESOLUTION=1000
 DEFAULT_EXTENSION='jpg'
@@ -16,6 +17,8 @@ begin
    manifest_id = " #{iiif_manifest['metadata'].select{|m| m['label'] == 'Id'}.first['value']}"
 rescue
 end
+
+`curl -X POST -d '{"type":"LOAD", "index_path":"#{PASTEC_INDEX_PATH}"' #{PASTEC_SERVER}/index/io`
 
 metadata_prefix = "#{iiif_manifest['label']}#{manifest_id}".gsub(/[^-.a-zA-Z0-9_]/,'_')
 pastec_identifier = 1
@@ -49,3 +52,5 @@ iiif_manifest['sequences'].each do |sequence|
   end
   current_sequence += 1
 end
+
+`curl -X POST -d '{"type":"WRITE", "index_path":"#{PASTEC_INDEX_PATH}"' #{PASTEC_SERVER}/index/io`
