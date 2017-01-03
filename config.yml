@@ -1,4 +1,4 @@
 ---
 :pastec_server: http://localhost:4212
-:pastec_index_path: /pastec/index.dat
+:pastec_index_path: /pastec-index/index.dat
 :persistent_store: iiif-pastec.yml
