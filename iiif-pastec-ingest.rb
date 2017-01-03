@@ -52,7 +52,7 @@ iiif_manifest['sequences'].each do |sequence|
       unless File.exist?(output_filename)
         # `curl #{url} | curl -X PUT --data-binary @- #{PASTEC_SERVER}/index/images/#{pastec_identifier}`
         $stderr.puts url
-        $stderr.puts `curl -o #{output_filename} #{url}`
+        $stderr.puts `curl -m 120 -o #{output_filename} #{url}`
         sleep(DEFAULT_DELAY)
       end
       store.transaction do
