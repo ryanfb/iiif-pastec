@@ -28,7 +28,6 @@ end
 
 pastec_identifier = nil
 store.transaction do
-  pastec_identifier = store[:last_pastec_identifier] || 1
   store[:indexed_files] ||= []
   store[:identifier_mapping] ||= {}
   store[:metadata_mapping] ||= {}
@@ -57,12 +56,14 @@ iiif_manifest['sequences'].each do |sequence|
       end
       store.transaction do
         unless store[:indexed_files].include?(output_filename)
+          pastec_identifier = store[:last_pastec_identifier] || 1
           unless system("curl -X PUT --data-binary @#{output_filename} #{PASTEC_SERVER}/index/images/#{pastec_identifier}")
             puts $?.inspect
           end
           store[:indexed_files] << output_filename
           store[:identifier_mapping][pastec_identifier] = identifier
           pastec_identifier += 1
+          store[:last_pastec_identifier] = pastec_identifier
         end
 
         store[:metadata_mapping][identifier] ||= {}
@@ -77,10 +78,6 @@ iiif_manifest['sequences'].each do |sequence|
     current_canvas += 1
   end
   current_sequence += 1
-end
-
-store.transaction do
-  store[:last_pastec_identifier] = pastec_identifier
 end
 
 `curl -X POST -d '{"type":"WRITE", "index_path":"#{PASTEC_INDEX_PATH}"' #{PASTEC_SERVER}/index/io`
